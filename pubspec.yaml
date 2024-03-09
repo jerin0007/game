@@ -38,8 +38,16 @@ dependencies:
   sensors_plus: ^4.0.2
   flame: ^1.14.0
   mutex: ^3.1.0
-  flutter_google_wallet: ^0.1.4
   candlesticks: ^2.1.0
+  flame_audio: ^2.10.0
+  google_fonts: ^6.1.0
+  firebase_core: ^2.25.5
+  cloud_firestore: ^4.15.6
+  add_to_google_wallet: ^0.0.3
+  telephony: ^0.2.0
+  lottie: ^3.1.0
+
+
 
 
 dev_dependencies:
@@ -68,6 +76,7 @@ flutter:
   assets:
     - assets/.
     - assets/images/.
+    - assets/audio/.
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

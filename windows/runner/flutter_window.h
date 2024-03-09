@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "win32_window.h"
+#include "win32_Window.h"
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -26,7 +26,7 @@ class FlutterWindow : public Win32Window {
   // The project to run.
   flutter::DartProject project_;
 
-  // The Flutter instance hosted by this window.
+  // The Flutter instance hosted by this Window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
 };
 

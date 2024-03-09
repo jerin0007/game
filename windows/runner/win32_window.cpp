@@ -1,4 +1,4 @@
-#include "win32_window.h"
+#include "win32_Window.h"
 
 #include <dwmapi.h>
 #include <flutter_windows.h>
@@ -73,7 +73,7 @@ class WindowClassRegistrar {
   const wchar_t* GetWindowClass();
 
   // Unregisters the window class. Should only be called if there are no
-  // instances of the window.
+  // instances of the Window.
   void UnregisterWindowClass();
 
  private:
@@ -200,7 +200,7 @@ Win32Window::MessageHandler(HWND hwnd,
     case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
-        // Size and position the child window.
+        // Size and position the child Window.
         MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
                    rect.bottom - rect.top, TRUE);
       }

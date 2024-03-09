@@ -36,10 +36,10 @@ class Win32Window {
   // |Show| is called. Returns true if the window was created successfully.
   bool Create(const std::wstring& title, const Point& origin, const Size& size);
 
-  // Show the current window. Returns true if the window was successfully shown.
+  // Show the current Window. Returns true if the window was successfully shown.
   bool Show();
 
-  // Release OS resources associated with window.
+  // Release OS resources associated with Window.
   void Destroy();
 
   // Inserts |content| into the window tree.
@@ -92,7 +92,7 @@ class Win32Window {
 
   bool quit_on_close_ = false;
 
-  // window handle for top level window.
+  // window handle for top level Window.
   HWND window_handle_ = nullptr;
 
   // window handle for hosted content.

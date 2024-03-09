@@ -1,27 +1,22 @@
-import 'dart:async';
-import 'dart:convert';
-// import 'dart:html';
-// import 'dart:math';
-
-// import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-// import 'package:flame/palette.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:sensors_plus/sensors_plus.dart';
-import 'package:candlesticks/candlesticks.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/widgets.dart';
+import 'package:game/trade.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:lottie/lottie.dart';
 
+import 'login.dart';
 import 'types.dart';
-import 'game.dart';
-// import 'package:flame/game.dart';
-// import 'package:flame/components.dart';
+import 'game/game.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MyApp()));
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,204 +25,200 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const Login(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class Home extends StatefulWidget {
+  const Home({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Home> createState() => _HomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeState extends State<Home> {
+  List credits = [];
+  List tradeHistory = [];
+
   @override
   void initState() {
-    generate();
-    fetchCandles().then((value) {
-      setState(() {
-        candles = value;
-      });
-    });
+    getData();
+
     super.initState();
   }
 
-  List<Map> asks = [];
-  List<Map> bids = [];
-  List<Candle> candles = [];
-
-  generate() {
-    for (var i = 0; i < 10; i++) {
-      DateTime now = DateTime.now();
-      now = now.add(Duration(days: random(-5, 5)));
-      asks.add({"amount": random(90, 120), "date": now.toString().split(" ")[0]});
+  getData() async {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
     }
-    for (var i = 0; i < 10; i++) {
-      DateTime now = DateTime.now();
-      now = now.add(Duration(days: random(-5, 5)));
-      bids.add({"amount": random(90, 120), "date": now.toString().split(" ")[0]});
-    }
-    // for (var ask in asks) {
-    // candles.add(Candle(
-    //     date: DateTime.now(),
-    //     open: ask['amount'] * 1.0,
-    //     high: ask['amount'] * 2.0,
-    //     low: ask['amount'] * 0.2,
-    //     close: ask['amount'] * 0.5,
-    //     volume: 0));
-    candles.add(Candle(date: DateTime.now(), open: 1780.36, high: 1873.93, low: 1755.34, close: 1848.56, volume: 0));
-    // }
+    final data = await FirebaseFirestore.instance.collection('gcc').where("userId", isEqualTo: userId).get();
 
-    asks.sort((a, b) {
-      a["amount"].compareTo(b["amount"]);
-      // if ( < b["amount"]) {
-      //   a = b;
-      // }
-      return 0;
-    });
+    credits = data.docs;
     setState(() {});
-  }
-
-  Future<List<Candle>> fetchCandles() async {
-    // var client = http.Client();
-
-    final uri = Uri.parse("https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h");
-    final res = await http.get(uri);
-    return (jsonDecode(res.body) as List<dynamic>).map((e) => Candle.fromJson(e)).toList().reversed.toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // double width = MediaQuery.of(context).size.width;
-    // double tw = width / 24;
-    Window.width = MediaQuery.of(context).size.width;
-    Window.height = MediaQuery.of(context).size.height;
-    Window.tileWidth = Window.width / 24;
+    AppConfig.width = MediaQuery.of(context).size.width;
+    AppConfig.height = MediaQuery.of(context).size.height;
+    AppConfig.tileWidth = AppConfig.width / 24;
+    AppConfig.mainContext = context;
     return SafeArea(
       child: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
-              Text(
-                "current market price",
-                style: TextStyle(fontSize: 20),
+              Row(
+                children: [
+                  SizedBox(width: 2),
+                  Image.asset(
+                    "assets/images/char.png",
+                    width: 20,
+                    // height: 20,
+                    fit: BoxFit.fitWidth,
+                  ),
+                  SizedBox(width: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      "Green Pledge",
+                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800, color: Colors.green),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 10),
-              Text(
-                "100\$",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                width: Window.width,
-                height: 250,
-                child: Candlesticks(
-                  candles: candles,
-                ),
-              ),
-              SizedBox(height: 10),
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectAsset())).then((_) {
+                    getData();
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.green.withOpacity(0.4)),
+                  child: Row(
+                    children: [
+                      Expanded(
                         child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("ask", style: TextStyle(fontSize: 18)),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              for (var ask in asks)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                          flex: 2,
-                                          child: Text("${ask["amount"]} \$",
-                                              style: TextStyle(fontSize: 16, color: Colors.red))),
-                                      Expanded(flex: 3, child: Text(ask["date"], style: TextStyle(fontSize: 16))),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )),
-                    SizedBox(width: 10),
-                    Expanded(
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("bid", style: TextStyle(fontSize: 18)),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              for (var bid in bids)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                          flex: 2,
-                                          child: Text("${bid["amount"]} \$",
-                                              style: TextStyle(fontSize: 16, color: Colors.green))),
-                                      Expanded(flex: 3, child: Text(bid["date"], style: TextStyle(fontSize: 16))),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )),
-                  ],
-                ),
-              ),
-              // Text("price"),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
-                      child: Center(
-                        child: Text(
-                          "Sell",
-                          style: TextStyle(color: Colors.white),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Trade now",
+                              style: TextStyle(fontSize: 15),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              "Buy and sell GCC with builtin trading platform",
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ],
                         ),
                       ),
-                    )),
-                    SizedBox(width: 10),
-                    Expanded(
-                        child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)),
-                      child: Center(
-                        child: Text(
-                          "Buy",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    )),
-                  ],
+                      Icon(
+                        Icons.attach_money_sharp,
+                        color: Colors.green,
+                      )
+                    ],
+                  ),
                 ),
               ),
+              // SizedBox(height: 10),
+              // GestureDetector(
+              //   onTap: () {
+              //     // Navigator.of(context).push(MaterialPageRoute(builder: (context) => TradePage()));
+              //   },
+              //   child: Container(
+              //     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+              //     decoration:
+              //         BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.green.withOpacity(0.4)),
+              //     child: Row(
+              //       children: [
+              //         Expanded(
+              //           child: Column(
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               Text(
+              //                 "View Trades",
+              //                 style: TextStyle(fontSize: 15),
+              //               ),
+              //               SizedBox(height: 2),
+              //               Text(
+              //                 "See previous trades",
+              //                 style: TextStyle(fontSize: 13),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //         Icon(
+              //           Icons.history,
+              //           color: Colors.green,
+              //         )
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // SizedBox(height: 15),
+              if (credits.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Text(
+                    "your credits",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              if (credits.isEmpty)
+                Expanded(child: Center(child: SizedBox(width: 200, child: Lottie.asset('assets/play.json'))))
+              else
+                Expanded(
+                  child: GridView.count(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.72,
+                    children: <Widget>[
+                      for (var gcc in credits)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            "assets/${gcc["type"]}.png",
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => GamePage())).then((_) {
+                    getData();
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.green),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Play Game",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -243,7 +234,37 @@ class GamePage extends StatefulWidget {
   State<GamePage> createState() => _GamePageState();
 }
 
-class _GamePageState extends State<GamePage> {
+class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      FlameAudio.bgm.play("bgm.mp3", volume: 0.6);
+    } else {
+      FlameAudio.bgm.pause();
+    }
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+
+    if (!FlameAudio.bgm.isPlaying) {
+      FlameAudio.bgm.play("bgm.mp3", volume: 0.6);
+    }
+
+    super.initState();
+  }
+
+  playAudio() {}
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    FlameAudio.bgm.stop();
+    FlameAudio.bgm.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -251,6 +272,5 @@ class _GamePageState extends State<GamePage> {
         game: MyGame(),
       ),
     );
-    ;
   }
 }
