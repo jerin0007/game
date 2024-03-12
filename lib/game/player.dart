@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
@@ -14,37 +15,50 @@ import '../miner.dart';
 
 class Player extends SpriteComponent with HasGameRef<MyGame>, CollisionCallbacks {
   int directionStrength = 0;
-  String playerDirection = "center";
+  String playerDirection = "left";
   bool up = false;
+
   @override
   FutureOr<void> onLoad() async {
     position.x = AppConfig.width / 2;
     position.y = AppConfig.height / 2;
     final playerImage = await Flame.images.load('char.png');
     sprite = Sprite(playerImage);
-    size = Vector2.all(AppConfig.tileWidth * 2);
-
+    size = Vector2(AppConfig.tileWidth * 2.5, AppConfig.tileWidth * 2.8);
     add(RectangleHitbox(
       isSolid: true,
-      size: Vector2.all(AppConfig.tileWidth * 2),
+      size: Vector2(AppConfig.tileWidth * 2.5, AppConfig.tileWidth * 2.8),
     ));
 
     accelerometerEventStream().listen(
       (AccelerometerEvent event) {
         if (event.x < 1.5 && event.x > -1.5) {
           directionStrength = 0;
-          playerDirection = "center";
+          // playerDirection = "center";
         } else if (event.x < 0) {
           directionStrength = event.x.abs().round();
-          playerDirection = "right";
+          if (playerDirection == "left") {
+            playerDirection = "right";
+            flipHorizontallyAroundCenter();
+            // flipHorizontally();
+          }
         } else {
           directionStrength = event.x.abs().round();
-          playerDirection = "left";
+          if (playerDirection == "right") {
+            playerDirection = "left";
+            // flipHorizontally();
+            flipHorizontallyAroundCenter();
+          }
         }
       },
       onError: (error) {},
       cancelOnError: true,
     );
+
+    // keyboardStream.listen((event) {
+    //   print("gottttt " + event.toString());
+    // });
+
     return super.onLoad();
   }
 
@@ -58,27 +72,30 @@ class Player extends SpriteComponent with HasGameRef<MyGame>, CollisionCallbacks
       mine();
       // audio
       if (type == "bus") {
-        FlameAudio.play("bus.wav", volume: 0.8);
+        FlameAudio.play("bus.mp3");
         AppConfig.score += 100;
         stat.updateScore(AppConfig.score.toString(), color: Colors.green);
       } else if (type == "plane") {
         if ((AppConfig.score - 100) > 0) {
           AppConfig.score -= 100;
-        }else{
+        } else {
           AppConfig.score = 0;
         }
-        FlameAudio.play("plane.wav");
+        FlameAudio.play("plane.mp3");
         stat.updateScore(AppConfig.score.toString(), color: Colors.red);
+      } else if (type == "switch") {
+        FlameAudio.play("switch.mp3", volume: 0.6);
+        AppConfig.score += 1000;
+        stat.updateScore(AppConfig.score.toString(), color: Colors.green);
       } else {
-        FlameAudio.play("jump.wav", volume: 0.6);
+        FlameAudio.play("$type.mp3", volume: 0.6);
         AppConfig.score += 20;
         stat.updateScore(AppConfig.score.toString());
       }
 
       up = true;
-      add(MoveByEffect(
-          Vector2(0, ((AppConfig.height / 2.5) - position.y) + 50), EffectController(duration: 0.8, curve: Curves.easeIn),
-          onComplete: () {
+      add(MoveByEffect(Vector2(0, ((AppConfig.height / 2.5) - position.y) + 50),
+          EffectController(duration: 0.8, curve: Curves.easeIn), onComplete: () {
         // await Future.delayed(const Duration(milliseconds: 300));
       }));
 

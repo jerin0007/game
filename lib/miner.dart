@@ -103,7 +103,7 @@ addPassToWallet(String value, {String? id}) async {
             "hexBackgroundColor": "${getColor(value, hex: true)}",
             "logo": {
               "sourceUri": {
-                "uri": "https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg"
+                "uri": "https://drive.usercontent.google.com/download?id=1QhVcYDoxISiXEXCpaWe2vTfB0WxJDl1a&export=view&authuser=0"
               }
             },
             "cardTitle": {
@@ -148,7 +148,8 @@ addPassToWallet(String value, {String? id}) async {
 
   AddToGoogleWallet().saveLoyaltyPass(
     pass: pass,
-    onError: (_) {},
+    onError: (_) {
+    },
     onSuccess: () async {
       CollectionReference ref = FirebaseFirestore.instance.collection("gcc");
       await ref.add({"gccId": passId, "userId": userId, "type": "${value}_GCC"});
@@ -236,7 +237,7 @@ _removePass(String passId, String value, String amount, QueryDocumentSnapshot gc
             "hexBackgroundColor": "${getColor(value)}",
             "logo": {
               "sourceUri": {
-                "uri": "https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg"
+                "uri": "https://drive.usercontent.google.com/download?id=1QhVcYDoxISiXEXCpaWe2vTfB0WxJDl1a&export=view&authuser=0"
               }
             },
             "cardTitle": {

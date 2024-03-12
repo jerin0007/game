@@ -1,8 +1,14 @@
+import 'dart:async';
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-String userId = "fccef7f7-76ad-4fdc-81e0-2806c1df4220";
+String userId = "***";
+
+StreamController<LogicalKeyboardKey> keyboard = StreamController<LogicalKeyboardKey>();
+StreamSink keyboardSink = keyboard.sink;
+Stream keyboardStream = keyboard.stream;
 
 class AppConfig {
   static double width = 0;

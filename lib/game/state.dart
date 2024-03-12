@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -41,6 +42,8 @@ class GameStat extends TextBoxComponent with HasGameRef<MyGame> {
 
   gameOver(String type) {
     if (overText == null) {
+      FlameAudio.play("out.mp3");
+
       add(overText = TextComponent(
           text: 'Game Over',
           textRenderer: TextPaint(
@@ -76,6 +79,4 @@ class GameStat extends TextBoxComponent with HasGameRef<MyGame> {
     bg.reset();
     AppConfig.gameOver = false;
   }
-
 }
-

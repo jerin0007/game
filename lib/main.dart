@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:game/trade.dart';
@@ -12,10 +13,13 @@ import 'login.dart';
 import 'types.dart';
 import 'game/game.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
+// if (kIsWeb){
+  // runApp(MyApp());
+// }
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MyApp()));
 }
 
@@ -31,7 +35,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Login(),
+      home: Login(),
     );
   }
 }
@@ -238,7 +242,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      FlameAudio.bgm.play("bgm.mp3", volume: 0.6);
+      FlameAudio.bgm.play("bgm.mp3", volume: 0.4);
     } else {
       FlameAudio.bgm.pause();
     }
@@ -249,7 +253,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     if (!FlameAudio.bgm.isPlaying) {
-      FlameAudio.bgm.play("bgm.mp3", volume: 0.6);
+      FlameAudio.bgm.play("bgm.mp3", volume: 0.4);
     }
 
     super.initState();
@@ -267,9 +271,46 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.of(context).size.width > 500) {
+      AppConfig.width = 500;
+    } else {
+      AppConfig.width = MediaQuery.of(context).size.width;
+    }
+    // AppConfig.width = MediaQuery.of(context).size.width;
+    AppConfig.height = MediaQuery.of(context).size.height;
+    AppConfig.tileWidth = AppConfig.width / 24;
+    AppConfig.mainContext = context;
+
     return SafeArea(
-      child: GameWidget(
-        game: MyGame(),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: AppConfig.width,
+                child: GameWidget(
+                  game: MyGame(),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                width: (MediaQuery.of(context).size.width - AppConfig.width) / 2,
+                height: AppConfig.height,
+                color: Colors.black,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: (MediaQuery.of(context).size.width - AppConfig.width) / 2,
+                height: AppConfig.height,
+                color: Colors.black,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

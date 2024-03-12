@@ -23,11 +23,11 @@ class Tile extends SpriteComponent with HasGameRef<MyGame>, CollisionCallbacks {
 
   Map spriteSize = {
     "can": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 3.5},
-    "glass": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 3.5},
-    "bag": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 3},
-    "plastic_bag": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 3},
-    "bus": {"width": AppConfig.tileWidth * 4, "height": AppConfig.tileWidth * 2.5},
-    "plane": {"width": AppConfig.tileWidth * 4, "height": AppConfig.tileWidth * 2.5},
+    "glass": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 2.8},
+    "bag": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 2.5},
+    "plastic_bag": {"width": AppConfig.tileWidth * 2, "height": AppConfig.tileWidth * 2.5},
+    "bus": {"width": AppConfig.tileWidth * 4, "height": AppConfig.tileWidth * 2},
+    "plane": {"width": AppConfig.tileWidth * 4, "height": AppConfig.tileWidth * 1.8},
     "switch": {"width": AppConfig.tileWidth * 1.5, "height": AppConfig.tileWidth * 2.5},
   };
 
@@ -75,15 +75,16 @@ class Tile extends SpriteComponent with HasGameRef<MyGame>, CollisionCallbacks {
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    if (type == "switch") {
+      flipVerticallyAroundCenter();
+    }
     if (type == "plastic_bag" || type == "glass") {
       if (!player.up) {
-        FlameAudio.play("out.wav");
         stat.gameOver(type);
       }
     } else {
       if (!AppConfig.gameOver) {
         player.jump(type);
-      
       }
     }
 
